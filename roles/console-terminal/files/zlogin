@@ -1,0 +1,33 @@
+# /etc/zsh/zlogin: system-wide .zlogin file for zsh(1).
+#
+# This file is sourced only for login shells. It
+# should contain commands that should be executed only
+# in login shells. It should be used to set the terminal
+# type and run a series of external commands (fortune,
+# msgs, from, etc.)
+#
+# Global Order: zshenv, zprofile, zshrc, zlogin
+if [ $SSH_CONNECTION ]; then
+  remote_ip=$(echo $SSH_CONNECTION | awk '{print $1}')
+  fmt_ip=$(echo $remote_ip | tr '.' ',')
+  tty=$(echo $SSH_TTY | tr '/' '|')
+
+  if command -v tmux > /dev/null && [ ! $TMUX ]; then
+    session_name="$USER@$fmt_ip$tty"
+    exec tmux new-session -As $session_name
+  fi
+
+  cat /etc/motd 2> /dev/null
+fi
+
+if [ ! $TMUX ]; then
+  export TMOUT=600
+fi
+
+if command -v nvim > /dev/null && [ $TERM != 'linux' ]; then
+  alias vi=nvim
+fi
+
+if command -v exa > /dev/null; then
+  alias ls=exa
+fi

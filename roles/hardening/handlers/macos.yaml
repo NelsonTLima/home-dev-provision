@@ -1,0 +1,7 @@
+# vi: ft=yaml.ansible
+---
+- name: Restart fail2ban
+  become: false
+  ansible.builtin.command:
+    cmd: "brew services restart fail2ban"
+  changed_when: false

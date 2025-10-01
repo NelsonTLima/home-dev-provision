@@ -1,0 +1,50 @@
+# vi: ft=yaml.ansible
+---
+- name: Install Packages
+  become: false
+  community.general.homebrew:
+    name: "{{ item }}"
+    update_homebrew: true
+    upgrade: true
+  loop:
+    - inetutils
+    - tmux
+    - htop
+    - git
+    - wget
+    - jq
+    - tree
+    - ripgrep
+    - fd
+    - fzf
+    - python3
+    - node
+    - go
+    - openjdk
+    - php
+    - lua
+    - luarocks
+
+- name: Install Extra Packages
+  become: false
+  community.general.homebrew:
+    name: "{{ item }}"
+  loop: "{{ extra_packages }}"
+  when: extra_packages is defined
+
+- name: Change Timezone
+  ansible.builtin.command:
+    cmd: "systemsetup -settimezone '{{ timezone }}'"
+  register: timezone_register
+  changed_when: false
+  check_mode: false
+
+- name: Compile Terminfo
+  become: true
+  become_user: "{{ user.name }}"
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+  ansible.builtin.command:
+    cmd: tic -x /tmp/xterm-ghostty.src
+    creates: "~/.terminfo/78/xterm-ghostty"

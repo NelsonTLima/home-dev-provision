@@ -1,0 +1,59 @@
+# vi: ft=yaml.ansible
+---
+- name: User setup role
+  become: true
+  block:
+    - name: Apt Dependencies
+      ansible.builtin.apt:
+        name:
+          - openssh-client
+          - openssh-server
+          - zsh
+        update_cache: true
+        cache_valid_time: 86400
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Brew Dependencies
+      become: false
+      loop_control:
+        loop_var: user
+      community.general.homebrew:
+        name:
+          - openssh
+      when: ansible_facts['os_family'] == 'Darwin'
+
+    - name: Create nfs group
+      ansible.builtin.group:
+        system: true
+        name: nfs-user
+
+    - name: Create nfs user
+      ansible.builtin.user:
+        system: true
+        hidden: true
+        createhome: false
+        shell: /bin/false
+        umask: "007"
+        name: nfs-user
+        group: nfs-user
+      when: nfs_exports is defined or nfs_imports is defined
+
+    - name: Create ssh user group
+      ansible.builtin.group:
+        system: true
+        name: ssh-user
+
+    - name: Setup users
+      ansible.builtin.user:
+        name: "{{ user.name }}"
+        home: "{{ user.home | default(omit) }}"
+        groups: "{{ user.groups | default(omit) }}"
+        append: "{{ user.append | default(true) }}"
+        shell: /bin/zsh
+        generate_ssh_key: "{{ user.generate_ssh_key | default(false) }}"
+        ssh_key_type: ed25519
+        umask: "077"
+        state: "{{ user.state | default('present') }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user

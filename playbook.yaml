@@ -1,0 +1,12 @@
+# vi: ft=yaml.ansible
+---
+- name: Playbook Ansible
+  hosts: all
+  tasks:
+    - name: Include Roles
+      # Chosen roles and host configurations come from inventory.
+      ansible.builtin.include_role:
+        name: "{{ role }}"
+      loop: "{{ chosen_roles }}"
+      loop_control:
+        loop_var: role

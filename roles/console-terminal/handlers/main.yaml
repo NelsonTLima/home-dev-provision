@@ -1,0 +1,9 @@
+# vi: ft=yaml.ansible
+---
+- name: Include Handlers for Debian
+  ansible.builtin.import_tasks: debian.yaml
+  when: ansible_os_family == "Debian"
+
+- name: Include handlesrs for MacOs
+  ansible.builtin.import_tasks: macos.yaml
+  when: ansible_os_family == "Darwin"

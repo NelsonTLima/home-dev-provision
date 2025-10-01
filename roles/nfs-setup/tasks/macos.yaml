@@ -1,0 +1,86 @@
+# vi: ft=yaml.ansible
+---
+- name: Server Tasks
+  when: nfs_exports is defined
+  block:
+    - name: Get nfs UID and GID (macos)
+      ansible.builtin.shell: |
+        set -euo pipefail
+        uid=$(dscl . -read /Users/nfs-user UniqueID | awk '{print $2}')
+        gid=$(dscl . -read /Users/nfs-user PrimaryGroupID | awk '{print $2}')
+        echo "${uid}:${gid}"
+      register: nfs_user_ids
+      changed_when: false
+      check_mode: false
+
+    - name: Define UID and GID variables
+      ansible.builtin.set_fact:
+        nfs_uid: "{{ nfs_user_ids.stdout.split(':')[0] }}"
+        nfs_gid: "{{ nfs_user_ids.stdout.split(':')[1] }}"
+
+    - name: Make NFS Server Directory
+      ansible.builtin.file:
+        path: "{{ export.from }}"
+        owner: nfs-user
+        group: staff
+        state: directory
+        mode: "4770"
+      loop: "{{ nfs_exports }}"
+      loop_control:
+        loop_var: export
+
+    - name: Ensure exports file exits
+      ansible.builtin.file:
+        path: /etc/exports
+        state: touch
+        owner: root
+        group: wheel
+        mode: "0660"
+
+    - name: Change /etc/exports
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "{{ export.from }} -mapall={{ nfs_uid }}:{{ nfs_gid }} {{ export.to }}"
+      loop: "{{ nfs_exports }}"
+      loop_control:
+        loop_var: export
+
+    - name: Export filesystem
+      ansible.builtin.command: nfsd restart
+      changed_when: false
+
+- name: Client Tasks
+  when: nfs_imports is defined
+  block:
+    - name: Make NFS Client Directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ import.to }}"
+        state: directory
+        mode: "4777"
+      when: nfs_imports
+      loop: "{{ nfs_imports }}"
+      loop_control:
+        loop_var: import
+
+    - name: Create fstab
+      ansible.builtin.file:
+        path: "/etc/fstab"
+        state: touch
+        owner: root
+        group: wheel
+        mode: "0700"
+
+    - name: Add line to fstab
+      ansible.builtin.lineinfile:
+        path: "/etc/fstab"
+        line: "{{ import.from }} {{ import.to }} nfs resvport 0 0"
+      when: nfs_imports
+      loop: "{{ nfs_imports }}"
+      loop_control:
+        loop_var: import
+
+    - name: Mount the File System
+      ansible.builtin.command:
+        cmd: automount -vc
+      changed_when: false

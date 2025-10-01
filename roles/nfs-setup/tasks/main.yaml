@@ -1,0 +1,27 @@
+# vi: ft=yaml.ansible
+---
+- name: NFS-SETUP
+  become: true
+  block:
+    - name: Create nfs group
+      ansible.builtin.group:
+        system: true
+        name: nfs-user
+
+    - name: Create nfs user
+      ansible.builtin.user:
+        system: true
+        hidden: true
+        createhome: false
+        shell: /bin/false
+        umask: "007"
+        name: nfs-user
+        group: nfs-user
+
+    - name: Debian
+      ansible.builtin.import_tasks: debian.yaml
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: MacOs
+      ansible.builtin.import_tasks: macos.yaml
+      when: ansible_facts['os_family'] == 'Darwin'
