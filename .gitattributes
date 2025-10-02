@@ -1,0 +1,5 @@
+# Forces playbooks treated as yaml by github
+*.yml linguist-language=YAML
+*.yaml linguist-language=YAML
+
+*.j2 linguist-language=Jinja
