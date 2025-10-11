@@ -17,7 +17,7 @@
     - openssh-client
     - build-essential
     # Terminal and monitoring
-    - exa
+    - eza
     - tmux
     - htop
     - net-tools

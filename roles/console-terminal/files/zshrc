@@ -106,3 +106,11 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 # PROMPT="$fg[green]%}$USER@%{$fg[white]%}%m ${PROMPT}"
+
+if command -v nvim > /dev/null && [ $TERM != 'linux' ]; then
+  alias vi=nvim
+fi
+
+if command -v eza > /dev/null; then
+  alias ls=eza
+fi
