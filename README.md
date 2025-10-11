@@ -1,3 +1,21 @@
+# How to execute
+
+1. Create a python virtual environment, activate it and install requirements.
+
+```bash
+python3 -m venv .venv
+source ./venv/bin/activate
+pip install -r requirements.txt
+```
+
+2. Use example.inventory.yaml to config your hosts
+
+3. Execute
+
+```bash
+ansible-playbook playbook.yaml -i inventory.yaml
+```
+
 # MY DEV CONFIGURATIONS
 
 
