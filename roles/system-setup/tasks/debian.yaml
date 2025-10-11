@@ -22,6 +22,7 @@
     - htop
     - net-tools
     - curl
+    - acl
 
 - name: Install Packages Full
   when:
@@ -66,6 +67,12 @@
   when: timezone is defined
   community.general.timezone:
     name: "{{ timezone }}"
+
+- name: Copy Terminfo
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/xterm-ghostty.src"
+    dest: /tmp/xterm-ghostty.src
+    mode: "0777"
 
 - name: Compile Terminfo
   ansible.builtin.command:

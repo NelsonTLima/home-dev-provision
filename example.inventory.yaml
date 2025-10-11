@@ -72,7 +72,7 @@ all:
       ansible_ssh_private_key_file: ~/.ssh/id_vagrant_ed25519
 
       chosen_roles:
-        # - debug-role
+        - debug-role
         - users-groups
         - system-setup
         - console-terminal
@@ -89,14 +89,13 @@ all:
       extra_packages:
         - blueman
         - bluez
-        - git-flow
 
       nfs_exports:
         - { from: "/srv/nfs", to: "192.168.57.0/24" }
-        # - { from: "/srv/nfs", to: "127.0.0.1" }
+        - { from: "/srv/nfs", to: "127.0.0.1" }
 
-      # nfs_imports:
-      #   - { from: "localhost:/srv/nfs", to: "/media/remote-nfs" }
+      nfs_imports:
+        - { from: "localhost:/srv/nfs", to: "/media/remote-nfs" }
 
       users:
         - name: root
@@ -104,14 +103,23 @@ all:
           append: true
           generate_ssh_key: false
 
+        - name: "{{ ansible_user_id }}"
+          home: "{{ ansible_env.HOME }}"
+          groups: [ssh-user, nfs-user]
+          generate_ssh_key: true
+          copy_ssh_keys: [~/.ssh/id_vagrant_ed25519]
+          authorized_keys: [~/.ssh/id_vagrant_ed25519.pub]
+          ssh_config: ~/.ssh/config
+
         - name: nelson
           home: /home/nelson
           generate_ssh_key: true
-          groups: [sudo, ssh-user, nfs-user]
+          groups: [sudo, ssh-user, nfs-user, docker]
           append: true
           copy_keys: [~/.ssh/id_vagrant_ed25519]
           authorized_keys: [~/.ssh/id_vagrant_ed25519.pub]
-          # ssh_config: ~/.ssh/config
+          ssh_config: ~/.ssh/config
+
 
     test-macos:
     # The user should manualy install homebrew .pkg

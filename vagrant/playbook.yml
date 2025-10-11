@@ -40,11 +40,11 @@
 
     - name: Install Gnome
       ansible.builtin.apt:
-        name: gnome-core
+        name: kde-plasma-desktop
 
     - name: Start GUI
       ansible.builtin.systemd_service:
-        name: gdm3
+        name: sddm
         state: restarted
 
     - name: Reboot

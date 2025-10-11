@@ -82,7 +82,7 @@ terminal emulator, sets zsh as the default shell and other tasks.
     - [x] Download Hack Nerd Font
     - [x] Extract Hack Nerd Font into the directory
 
-- [ ] Install tmux
+- [x] Install tmux
 
 ___
 ## VIM SETUP
@@ -91,9 +91,9 @@ Installs vim into the hosts, copies .vimrc and installs some vim plugins.
 
 ### Tasks
 
-- [ ] Copy .vimrc to the host
+- [x] Copy .vimrc to the host
 - [x] Install latest vim
-- [ ] Install vim pluggins
+- [x] Install vim pluggins
 
 
 ## NEOVIM SETUP
@@ -102,9 +102,9 @@ Installs neovim, copies its config directory to the hosts and add neovim alias.
 
 ### Tasks
 
-- [ ] Install neovim
-- [ ] Copy configuration dir to the hosts.
-- [ ] Add a neovim alias into de .zshrc
+- [x] Install neovim
+- [x] Copy configuration dir to the hosts.
+- [x] Add a neovim alias into de .zshrc
 
 ___
 ## NFS-SETUP
@@ -114,19 +114,19 @@ tasks includes instaling nfs at the hosts and modify the configuration files.
 
 ### All Hosts Tasks
 
-- [ ] Install nfs-commons
+- [x] Install nfs-commons
 
 ### Server Only
 
-- [ ] Install nfs-kernel-server
-- [ ] Create the nfs directoty
-- [ ] Add the configuration line to the exports file
-- [ ] Export the filesystem
+- [x] Install nfs-kernel-server
+- [x] Create the nfs directoty
+- [x] Add the configuration line to the exports file
+- [x] Export the filesystem
 
 ### Client only
 
-- [ ] Add the nfs server to fstab
-- [ ] Mount the file system
+- [x] Add the nfs server to fstab
+- [x] Mount the file system
 
 ___ 
 ## HARDENING

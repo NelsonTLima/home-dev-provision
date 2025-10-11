@@ -1,3 +1,4 @@
+# vi: ft=yaml.ansible
 ---
 - name: Ensure ~/.ssh directory exists for each user
   become: true

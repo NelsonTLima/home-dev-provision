@@ -1,6 +1,9 @@
 # Ansible
 .ansible
+
+# Vagrant
 .vagrant
+.venv
 
 # MacOs
 .DS_store
