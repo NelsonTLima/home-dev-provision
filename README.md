@@ -5,7 +5,8 @@
 ```bash
 python3 -m venv .venv
 source ./venv/bin/activate
-pip install -r requirements.txt
+pip install -r python.requirements.txt
+ansible-galaxy install -r ansible.requirements.yml
 ```
 
 2. Use example.inventory.yaml to config your hosts
