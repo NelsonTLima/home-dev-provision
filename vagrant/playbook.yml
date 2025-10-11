@@ -38,7 +38,7 @@
       ansible.builtin.apt:
         update_cache: true
 
-    - name: Install Gnome
+    - name: Install GUI
       ansible.builtin.apt:
         name: kde-plasma-desktop
 
