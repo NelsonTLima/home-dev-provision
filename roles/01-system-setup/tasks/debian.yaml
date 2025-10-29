@@ -1,0 +1,80 @@
+# vi: ft=yaml.ansible
+---
+- name: Install Packages Minimal
+  when: >
+    (
+    packages is undefined
+    or packages == "minimal"
+    or packages == "full"
+    )
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 86400
+    name: "{{ item }}"
+  loop:
+    # Essentials
+    - openssh-server
+    - openssh-client
+    - build-essential
+    # Terminal and monitoring
+    - eza
+    - tmux
+    - htop
+    - net-tools
+    - curl
+    - acl
+
+- name: Install Packages Full
+  when:
+    - packages is defined
+    - packages == "full"
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 86400
+    name: "{{ item }}"
+  loop:
+    # CLI tools
+    - snapd
+    - git
+    - wget
+    - zip
+    - jq
+    - tree
+    - ripgrep
+    - fd-find
+    - fzf
+    # Programing Languages
+    - python3
+    - python3-pip
+    - python3-venv
+    - nodejs
+    - npm
+    - golang
+    - default-jdk
+    - php-cli
+    - php-curl
+    - lua5.4
+    - luarocks
+
+- name: Extra packages
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 86400
+    name: "{{ item }}"
+  loop: "{{ extra_packages }}"
+
+- name: Change Timezone
+  when: timezone is defined
+  community.general.timezone:
+    name: "{{ timezone }}"
+
+- name: Copy Terminfo
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/xterm-ghostty.src"
+    dest: /tmp/xterm-ghostty.src
+    mode: "0777"
+
+- name: Compile Terminfo
+  ansible.builtin.command:
+    cmd: tic -x -o /usr/share/terminfo/ /tmp/xterm-ghostty.src
+    creates: "/usr/share/terminfo/x/xterm-ghostty"

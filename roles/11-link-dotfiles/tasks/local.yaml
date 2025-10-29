@@ -1,0 +1,118 @@
+# vi: ft=yaml.ansible
+---
+- name: Remove .config dirs
+  become: true
+  become_user: "{{ item.0.name }}"
+  ansible.builtin.file:
+    path: "{{ item.1 }}"
+    state: absent
+  vars:
+    directories:
+      - "~/.config/hypr"
+      - "~/.config/waybar"
+      - "~/.config/wofi"
+      - "~/.config/nvim"
+      - "~/.config/ghostty"
+      - "~/Library/Application\ Support/com.mitchellh.ghostty/"
+  with_nested:
+    - "{{ users }}"
+    - "{{ directories }}"
+
+
+- name: Create symlink for hyprland config
+  become: true
+  become_user: "{{ user.name }}"
+  when: ansible_facts['os_family'] == 'Archlinux'
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/dotfiles/hypr"
+    dest: "~/.config/hypr"
+    state: link
+    force: true
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Create symlink for waybar config
+  become: true
+  become_user: "{{ user.name }}"
+  when: ansible_facts['os_family'] == 'Archlinux'
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/dotfiles/waybar"
+    dest: "~/.config/waybar"
+    state: link
+    force: true
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Create symlink for wofi config
+  become: true
+  become_user: "{{ user.name }}"
+  when: ansible_facts['os_family'] == 'Archlinux'
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/dotfiles/wofi"
+    dest: "~/.config/wofi"
+    state: link
+    force: true
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Create symlink for backgrounds
+  when: ansible_facts['os_family'] == 'Archlinux'
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/dotfiles/backgrounds"
+    dest: "/usr/share/backgrounds/custom"
+    state: link
+    force: true
+
+
+- name: Create symlink for Ghostty config
+  when: >
+    (
+    ansible_facts['os_family'] == 'Debian'
+    or ansible_facts['os_family'] == 'Archlinux'
+    )
+  become: true
+  become_user: "{{ user.name }}"
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/dotfiles/ghostty"
+    dest: "~/.config/ghostty"
+    state: link
+    force: true
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Create symlink for Ghostty config (Macos)
+  when: >
+    (
+    ansible_facts['os_family'] == 'Darwin'
+    )
+  become: true
+  become_user: "{{ user.name }}"
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/dotfiles/ghostty"
+    dest: "~/Library/Application Support/com.mitchellh.ghostty/config"
+    state: link
+    force: true
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Create symlink for nvim config
+  become: true
+  become_user: "{{ user.name }}"
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/dotfiles/nvim"
+    dest: "~/.config/nvim"
+    state: link
+    force: true
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user

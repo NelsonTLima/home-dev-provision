@@ -1,0 +1,79 @@
+# vi: ft=yaml.ansible
+---
+- name: Install Vim Pluggins
+  become: true
+  block:
+    - name: Install nerdtree
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/preservim/nerdtree.git"
+        dest: "~/.vim/pack/vendor/start/nerdtree"
+        version: master
+
+    - name: Set nerdtree help
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.command:
+        cmd: 'vim -u NONE -c "helptags ~/.vim/pack/vendor/start/nerdtree/doc" -c q'
+      changed_when: false
+
+    - name: Install Vim-Devicons
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/ryanoasis/vim-devicons.git"
+        dest: "~/.vim/pack/ryanoasis/start/vim-devicons"
+        version: master
+
+    - name: Install Nerdtree-syntax-highlight
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/tiagofumo/vim-nerdtree-syntax-highlight.git"
+        dest: "~/.vim/pack/tiagofumo/start/vim-nerdtree-syntax-highlight"
+        version: master
+
+    - name: Install Vim-Airline
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/vim-airline/vim-airline"
+        dest: "~/.vim/pack/dist/start/vim-airline"
+        version: master
+
+    - name: Install GitGutter
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/airblade/vim-gitgutter.git"
+        dest: "~/.vim/pack/tpope/start/vim-gitgutter"
+        version: main
+
+    - name: Set gitgutter help
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.command:
+        cmd: 'vim -u NONE -c "helptags vim-gitgutter/doc" -c q'
+      changed_when: false

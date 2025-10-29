@@ -1,0 +1,6 @@
+# vi: ft=yaml.ansible
+---
+- name: Import tasks if localhost
+  become: true
+  when: ansible_connection == 'local'
+  ansible.builtin.import_tasks: local.yaml

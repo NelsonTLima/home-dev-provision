@@ -1,0 +1,23 @@
+# vi: ft=yaml.ansible
+---
+- name: Hardening Playbook
+  become: true
+  block:
+    - name: Copy sshd_config
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/sshd_config"
+        dest: "/etc/ssh/sshd_config"
+        owner: "root"
+        mode: "0644"
+
+    - name: Debian
+      ansible.builtin.import_tasks: linux.yaml
+      when: >
+        (
+        ansible_facts['os_family'] == 'Debian'
+        or ansible_facts['os_family'] == 'Archlinux'
+        )
+
+    # - name: MacOs
+    #   ansible.builtin.import_tasks: macos.yaml
+    #   when: ansible_facts['os_family'] == 'Darwin'

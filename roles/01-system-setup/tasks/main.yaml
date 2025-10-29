@@ -1,0 +1,16 @@
+# vi: ft=yaml.ansible
+---
+- name: System Setup Playbook
+  become: true
+  block:
+    - name: Debian
+      ansible.builtin.import_tasks: debian.yaml
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Arch
+      ansible.builtin.import_tasks: arch.yaml
+      when: ansible_facts['os_family'] == 'Archlinux'
+
+    - name: MacOs
+      ansible.builtin.import_tasks: macos.yaml
+      when: ansible_facts['os_family'] == 'Darwin'

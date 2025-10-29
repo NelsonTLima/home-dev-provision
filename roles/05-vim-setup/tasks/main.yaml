@@ -1,0 +1,33 @@
+# vi: ft=yaml.ansible
+---
+- name: Vim Setup Playbook
+  become: true
+  block:
+    - name: Pacman Install gvim
+      ansible.builtin.pacman:
+        name: gvim
+        state: present
+      when: ansible_facts['os_family'] == 'Archlinux'
+
+    - name: Apt Install vim-gtk3
+      ansible.builtin.apt:
+        name: vim-gtk3
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Brew Install vim
+      become: false
+      community.general.homebrew:
+        name: vim
+      when: ansible_facts['os_family'] == 'Darwin'
+
+    - name: Copy .vimrc
+      become: true
+      become_user: "{{ user.name }}"
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/dotfiles/vimrc"
+        dest: "~/.vimrc"
+        owner: "{{ user.name }}"
+        mode: "0644"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user

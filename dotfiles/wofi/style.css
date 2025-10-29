@@ -1,0 +1,41 @@
+* {
+  font-family: Hack Nerd Font;
+  font-size: 16px;
+  background: transparent;
+}
+
+#window {
+  padding: 10px;
+}
+
+#input {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 15px;
+}
+
+#outer-box {
+  padding: 20px;
+  border: 3px solid cyan;
+  border-radius: 20px;
+  background: #1e1e1f
+}
+
+#img {
+  margin-right: 6px;
+  margin-left: 6px;´
+}
+
+#entry {
+  padding: 10px;
+  border-radius: 15px;
+}
+
+#entry:selected {
+  color: #1e1e1f;
+  background: cyan;
+}
+
+#text {
+  margin: 2px;
+}

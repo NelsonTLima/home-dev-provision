@@ -1,0 +1,86 @@
+# vi: ft=yaml.ansible
+---
+- name: Check Dependencies (Debian)
+  when: ansible_facts['os_family'] == 'Debian'
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    update_cache: true
+    cache_valid_time: 86400
+  loop:
+    - fail2ban
+    - ufw
+
+- name: Check Dependencies (Arch)
+  when: ansible_facts['os_family'] == 'Archlinux'
+  ansible.builtin.pacman:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - fail2ban
+    - ufw
+
+- name: UFW allows ssh (Debian)
+  when: ansible_facts['os_family'] == 'Debian'
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: UFW allows ssh (Arch)
+  when: ansible_facts['os_family'] == 'Archlinux'
+  community.general.ufw:
+    rule: allow
+    port: 22
+
+- name: Allow nfs connections
+  when: nfs_exports is defined
+  block:
+    - name: Allow port 111
+      community.general.ufw:
+        rule: allow
+        port: 111
+        from: "{{ item.to }}"
+      loop: "{{ nfs_exports }}"
+
+    - name: Allow port 2049
+      community.general.ufw:
+        rule: allow
+        port: 2049
+        from: "{{ item.to }}"
+      loop: "{{ nfs_exports }}"
+
+    - name: Allow port 5201
+      community.general.ufw:
+        rule: allow
+        port: 5201
+        from: "{{ item.to }}"
+      loop: "{{ nfs_exports }}"
+
+- name: UFW denies by default
+  community.general.ufw:
+    state: enabled
+    policy: deny
+  notify: Restart ufw
+
+- name: Copy ssh fail2ban jail
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/jail_ssh.conf"
+    dest: "/etc/fail2ban/jail.d/jail_ssh.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart fail2ban
+
+- name: Get all users
+  ansible.builtin.getent:
+    database: passwd
+
+- name: Remove unlisted users
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ getent_passwd | dict2items }}"
+  when:
+    - (item.value[1] | int) > 999
+    - item.key != 'root'
+    - item.key != 'nobody'
+    - item.key not in (users | map(attribute='name') | list)

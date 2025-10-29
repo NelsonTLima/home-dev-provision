@@ -1,0 +1,62 @@
+# vi: ft=yaml.ansible
+---
+- name: System Setup
+  become: true
+  block:
+    - name: Debian
+      ansible.builtin.import_tasks: linux.yaml
+      when: >
+        (
+        ansible_facts['os_family'] == 'Debian'
+        or ansible_facts['os_family'] == 'Archlinux'
+        )
+
+    - name: MacOs
+      ansible.builtin.import_tasks: macos.yaml
+      when: ansible_facts['os_family'] == 'Darwin'
+
+    - name: Clonning Oh My Zsh
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/ohmyzsh/ohmyzsh.git"
+        dest: "~/.oh-my-zsh"
+        version: master
+        force: true
+
+    - name: Download zsh-autosuggestions
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/zsh-users/zsh-autosuggestions.git"
+        dest: "~/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+        version: master
+
+    - name: Download zsh-fast-syntax-highlighting
+      become: true
+      become_user: "{{ user.name }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      ansible.builtin.git:
+        repo: "https://github.com/zdharma-continuum/fast-syntax-highlighting.git"
+        dest: "~/.oh-my-zsh/custom/plugins/fast-syntax-highlighting"
+        version: master
+
+    - name: Copy .zshrc to {{ user.name }}
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user
+      become: true
+      become_user: "{{ user.name }}"
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/dotfiles/zshrc"
+        dest: "~/.zshrc"
+        owner: "{{ user.name }}"
+        mode: '0644'

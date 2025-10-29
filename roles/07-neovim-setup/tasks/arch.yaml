@@ -1,0 +1,26 @@
+# vi: ft=yaml.ansible
+---
+- name: Neovim dependencies
+  ansible.builtin.pacman:
+    name:
+      - gcc
+      - git
+      - python3
+      - python-pip
+      - nodejs
+      - npm
+      - go
+      - jdk-openjdk
+      - php
+      - lua
+      - luarocks
+      - tree-sitter
+      - tree-sitter-cli
+      - wl-clipboard
+      - xclip
+      - jq
+      - ripgrep
+      - fd
+      - fzf
+      - neovim
+    state: present

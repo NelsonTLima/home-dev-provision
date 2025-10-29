@@ -1,0 +1,39 @@
+# vi: ft=yaml.ansible
+---
+- name: Brew Install Ghostty
+  become: false
+  community.general.homebrew_cask:
+    name: ghostty
+
+
+- name: Ensure ghostty directory exists
+  become: true
+  become_user: "{{ user.name }}"
+  ansible.builtin.file:
+    path: "~/Library/Application\ Support/com.mitchellh.ghostty/"
+    owner: "{{ user.name }}"
+    state: directory
+    mode: "2751"
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Copy Ghostty Configuration
+  become: true
+  become_user: "{{ user.name }}"
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/dotfiles/ghostty/config"
+    dest: "~/Library/Application Support/com.mitchellh.ghostty/config"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Extract Hack Nerd Font zip
+  ansible.builtin.unarchive:
+    src: "/tmp/Hack.zip"
+    dest: "/Library/Fonts"
+    remote_src: true

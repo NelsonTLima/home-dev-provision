@@ -1,0 +1,63 @@
+# vi: ft=yaml.ansible
+---
+- name: Dependency Check (Debian)
+  ansible.builtin.apt:
+    name:
+      - snapd
+      - wget
+      - zip
+  when: ansible_facts['os_family'] == 'Debian'
+
+
+- name: Install Ghostty (Debian)
+  community.general.snap:
+    name: ghostty
+    classic: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+
+- name: Install Ghostty (Arch)
+  community.general.pacman:
+    name: ghostty
+    state: present
+  when: ansible_facts['os_family'] == 'Archlinux'
+
+
+- name: Ensure Hack Nerd Font directory exists
+  ansible.builtin.file:
+    path: "/usr/share/fonts/Hack"
+    state: directory
+    mode: "0755"
+
+
+- name: Extract Hack Nerd Font zip
+  ansible.builtin.unarchive:
+    src: "/tmp/Hack.zip"
+    dest: "/usr/share/fonts/Hack"
+    remote_src: true
+
+
+- name: Ensure ghostty directory exists
+  become: true
+  ansible.builtin.file:
+    path: "~/.config/ghostty"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    state: directory
+    mode: "2751"
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+
+- name: Copy Ghostty Configuration
+  become: true
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/dotfiles/ghostty/config"
+    dest: "~/.config/ghostty/config"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user

@@ -1,0 +1,45 @@
+# vi: ft=yaml.ansible
+---
+- name: Install Dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+  loop:
+    - console-setup
+    - git
+    - tmux
+    - zsh
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Copy console-setup file
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/console-setup"
+    dest: /etc/default/console-setup
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart console-setup
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Copy tmux.conf
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/dotfiles/tmux.conf"
+    dest: "/etc/tmux.conf"
+    owner: root
+    group: root
+    mode: '0664'
+
+- name: Set zsh as default shell
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    shell: "/bin/zsh"
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+
+- name: Copy zlogin to host
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/zlogin"
+    dest: "/etc/zsh/zlogin"
+    owner: root
+    group: root
+    mode: "0644"

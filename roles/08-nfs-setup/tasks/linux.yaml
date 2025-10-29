@@ -1,0 +1,108 @@
+# vi: ft=yaml.ansible
+---
+- name: Install nfs-utils (Arch)
+  ansible.builtin.pacman:
+    name: nfs-utils
+    state: present
+  when: ansible_facts['os_family'] == 'Archlinux'
+
+- name: Server Tasks
+  when: nfs_exports is defined
+  block:
+    - name: Get nfs-user data
+      ansible.builtin.getent:
+        database: passwd
+        key: nfs-user
+
+    - name: Get nfs-user UID and GID
+      ansible.builtin.set_fact:
+        nfs_uid: "{{ getent_passwd['nfs-user'][1] }}"
+        nfs_gid: "{{ getent_passwd['nfs-user'][2] }}"
+
+    - name: Install nfs-kernel-server (Debian)
+      ansible.builtin.apt:
+        name: nfs-kernel-server
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Make NFS Server Directory
+      ansible.builtin.file:
+        path: "{{ export.from }}"
+        owner: nfs-user
+        group: nfs-user
+        state: directory
+        mode: "4770"
+      loop: "{{ nfs_exports }}"
+      loop_control:
+        loop_var: export
+
+    - name: Define ACL to nfs user
+      ansible.posix.acl:
+        path: "{{ export.from }}"
+        entry: "default:user::rw"
+        state: present
+      loop: "{{ nfs_exports }}"
+      loop_control:
+        loop_var: export
+
+    - name: Define ACL to nfs group
+      ansible.posix.acl:
+        path: "{{ export.from }}"
+        entry: "default:group::rw"
+        state: present
+      loop: "{{ nfs_exports }}"
+      loop_control:
+        loop_var: export
+
+    - name: Change /etc/exports
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "{{ export.from }} {{ export.to }}(rw,sync,no_subtree_check,all_squash,anonuid={{ nfs_uid }},anongid={{ nfs_gid }})"
+      loop: "{{ nfs_exports }}"
+      loop_control:
+        loop_var: export
+
+    - name: Export filesystem
+      ansible.builtin.command: exportfs -ra
+      changed_when: false
+
+    - name: Restart NFS service
+      ansible.builtin.service:
+        name: nfs-kernel-server
+        state: restarted
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Restart NFS service
+      ansible.builtin.service:
+        name: nfs-server
+        enabled: true
+        state: restarted
+      when: ansible_facts['os_family'] == 'Archlinux'
+
+- name: Client Tasks
+  when: nfs_imports is defined
+  block:
+    - name: Install nfs-common
+      ansible.builtin.apt:
+        name: nfs-common
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Make NFS Client Directories
+      ansible.builtin.file:
+        path: "{{ import.to }} "
+        state: directory
+        mode: "4777"
+      when: nfs_imports
+      loop: "{{ nfs_imports }}"
+      loop_control:
+        loop_var: import
+
+    - name: Mount fstab
+      ansible.posix.mount:
+        path: "{{ import.to }}"
+        src: "{{ import.from }}"
+        fstype: "nfs"
+        opts: "defaults"
+        state: mounted
+      loop: "{{ nfs_imports }}"
+      loop_control:
+        loop_var: import

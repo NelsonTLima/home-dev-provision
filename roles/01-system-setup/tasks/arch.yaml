@@ -1,0 +1,124 @@
+# vi: ft=yaml.ansible
+---
+- name: Change Timezone
+  when: timezone is defined
+  community.general.timezone:
+    name: "{{ timezone }}"
+
+- name: Copy Terminfo
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/xterm-ghostty.src"
+    dest: /tmp/xterm-ghostty.src
+    mode: "0777"
+
+- name: Compile Terminfo
+  ansible.builtin.command:
+    cmd: tic -x -o /usr/share/terminfo/ /tmp/xterm-ghostty.src
+    creates: "/usr/share/terminfo/x/xterm-ghostty"
+
+- name: Install drivers and basic libs
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - bluez
+    - libpng
+    - zip
+    - dosfstools
+
+- name: Install qt-gtk integration
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - qt6ct
+    - fcitx5
+    - fcitx5-gtk
+    - fcitx5-qt
+
+- name: Install fonts
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - noto-fonts
+    - noto-fonts-cjk
+    - noto-fonts-extra
+    - noto-fonts-emoji
+    - otf-font-awesome
+
+- name: Install dev dependencies
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - base-devel
+    - linux-headers
+    - git
+    - gvim
+    - python3
+    - python-pip
+    - nodejs
+    - npm
+    - go
+    - jdk-openjdk
+    - php
+    - lua
+    - luarocks
+    - tree-sitter
+    - tree-sitter-cli
+    - wl-clipboard
+    - xclip
+    - virtualbox-host-modules-arch
+    - virtualbox-guest-iso
+    - virtualbox
+
+- name: Install utils
+  become: true
+  community.general.pacman:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - chromium
+    - libreoffice
+    - libpng
+    - inetutils
+    - net-tools
+    - acl
+    - eza
+    - tmux
+    - htop
+    - wget
+    - curl
+    - jq
+    - ripgrep
+    - fd
+    - fzf
+
+- name: Install hyprland dependencies
+  become: true
+  when: hyprland is defined and hyprland is true
+  community.general.pacman:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - hyprpaper
+    - waybar
+    - wofi
+    - pavucontrol
+    - exfatprogs
+    - archlinux-xdg-menu
+    - blueberry
+
+# TODO: Install yay
+- name: Get yay
+  ansible.builtin.debug:
+    msg: "TODO: Get yay"
+
+- name: Install yay
+  ansible.builtin.debug:
+    msg: "Make yay"
