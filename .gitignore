@@ -10,6 +10,7 @@
 
 # Vim
 *.swp
+*.vimrc
 
 # Secret keys
 *ed25519
@@ -18,3 +19,7 @@
 *rsa.pub
 
 debug-role/
+
+# Lazy
+lazy-lock.json
+lazyvim.json

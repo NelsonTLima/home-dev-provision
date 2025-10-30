@@ -57,6 +57,7 @@
     - luarocks
 
 - name: Extra packages
+  when: extra_packages is defined
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 86400
