@@ -115,6 +115,25 @@
         - docker-buildx-plugin
         - docker-compose-plugin
 
+    - name: Add Oracle VirtualBox GPG key
+      ansible.builtin.apt_key:
+        url: https://www.virtualbox.org/download/oracle_vbox_2016.asc
+        state: present
+
+    - name: Add VirtualBox repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib"
+        state: present
+
+    - name: Update APT cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install VirtualBox
+      ansible.builtin.apt:
+        name: virtualbox
+        state: present
+
 
 - name: Extra packages
   when: extra_packages is defined
